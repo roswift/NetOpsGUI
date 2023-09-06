@@ -1,7 +1,5 @@
 from nslookup import Nslookup
 import re
-import pandas
-
 
 class SOA:
     def __init__(self, args):
