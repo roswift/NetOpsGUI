@@ -108,7 +108,7 @@ class DNS:
 
 def main():
     ### Changes your DNS as needed
-    domain_server = ["10.9.4.11"]
+    domain_server = ["1.1.1.1"]
     print(
         "[Domain example]: google.com, yahoo.com, youtube.com, speedtest.net, twitch.tv"
     )
