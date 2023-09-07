@@ -1,4 +1,5 @@
-from nslookup import Nslookup
+from nslookup import Nslookup, DNSresponse
+import logging
 import re
 
 ### https://github.com/wesinator/pynslookup
@@ -6,131 +7,155 @@ import re
 
 
 class SOA:
-    def __init__(self, args):
-        self.args = args
+    """Class representing DNS Data"""
 
-    def clean_results(self):
+    def __init__(self, soa_response: DNSresponse, logger: logging.Logger = None):
+        """_summary_
+
+        Args:
+            soa_response (DNSresponse): DNSresponse object from nslookup
+            logger (logging.Logger, optional): Optional logger. One will be created if not provided.
+        """
+
+        self.soa_data = soa_response.response_full
+        self.logger = logging.getLogger("SOA") if logger is None else logger
+
+    def clean_soa_results(self) -> list[str]:
+        """Clean SOA response data from nslookup.
+
+        Returns:
+            list[str]: List of cleaned SOA data
+        """
+
         cleaned_results = []
-        entry = self.args[0]
+        entry = self.soa_data[0]
         split_strings = re.split(r" ", entry)
         for result in split_strings:
             cleaned_results.append(result)
         return cleaned_results
 
-    def enrich_soa_results(self, result):
-        results = {}
+    def print_soa_results(self, cleaned_results: list[str]) -> None:
         # Check if the result list contains at least 11 elements
-        if len(result) >= 11:
-            # Extract individual pieces of information
-            results["Domain Name"] = result[0]
-            results["TTL"] = result[1]
-            results["Record Class"] = result[2]
-            results["Record Type"] = result[3]
-            results["Primary Name Server"] = result[4]
-            results["Responsible Email"] = result[5]
-            results["Serial Number"] = result[6]
-            results["Refresh Interval"] = result[7]
-            results["Retry Interval"] = result[8]
-            results["Expire Limit"] = result[9]
-            results["Minimum TTL"] = result[10]
+        if len(cleaned_results) >= 11:
+            enriched_results = {
+                # Extract individual pieces of information
+                "Domain Name": cleaned_results[0],
+                "TTL": cleaned_results[1],
+                "Record Class": cleaned_results[2],
+                "Record Type": cleaned_results[3],
+                "Primary Name Server": cleaned_results[4],
+                "Responsible Email": cleaned_results[5],
+                "Serial Number": cleaned_results[6],
+                "Refresh Interval": cleaned_results[7],
+                "Retry Interval": cleaned_results[8],
+                "Expire Limit": cleaned_results[9],
+                "Minimum TTL": cleaned_results[10],
+            }
+            self.logger.info(enriched_results)
         else:
-            print("Invalid result format:", result)
-        print(results)
-        return results
+            self.logger.error(
+                f"[RESULT]: {cleaned_results} is invalid result format. Length is < 11"
+            )
 
 
 class DNS:
-    def __init__(self, args):
-        self.args = args
+    """Class representing DNS Data"""
 
-    def clean_results(self):
+    def __init__(self, dns_response: DNSresponse, logger: logging.Logger = None):
+        """Initialize a DNS object.
+
+        Args:
+            dns_response (DNSresponse): DNSresponse object from nslookup
+            logger (logging.Logger, optional): Optional logger. One will be created if not provided.
+        """
+        self.dns_data = dns_response.response_full
+        self.logger = logging.getLogger("DNS") if logger is None else logger
+
+    def clean_results(self) -> list[str]:
+        """Clean DNS response data from nslookup.
+
+        Returns:
+            list[str]: List of cleaned DNS data
+        """
         cleaned_results = []
-        entry = self.args[0]
+        entry = self.dns_data[0]
         split_strings = re.split(r"\n", entry)
         for result in split_strings:
             cleaned_results.append(result)
         return cleaned_results
 
-    def enrich_v4_results(self, result):
-        parts = result.split()
-        if len(parts) >= 5:
-            enriched_results = {
-                "Domain": parts[0],
-                "TTL": parts[1],
-                "Type": parts[3],
-                "IP": parts[4],
-            }
-            print(enriched_results)
-        else:
-            print("Invalid result format:", result)
+    def print_dns_results(self, cleaned_results: list[str]) -> None:
+        """Format and print cleaned DNS result data
 
-    def enrich_v6_results(self, result):
-        parts = result.split()
-        if len(parts) >= 5:
-            enriched_results = {
-                "Domain": parts[0],
-                "TTL": parts[1],
-                "Type": parts[3],
-                "IP": parts[4],
-            }
-            print(enriched_results)
-        else:
-            print("Invalid result format:", result)
+        Args:
+            cleaned_results (list[str]): Cleaned DNS result data from 'DNS.clean_results'
+        """
+        for result in cleaned_results:
+            part = result.split()
+            if len(result) >= 5:
+                enriched_results = {
+                    "Domain": part[0],
+                    "TTL": part[1],
+                    "Type": part[3],
+                    "IP": part[4],
+                }
+                self.logger.info(enriched_results)
+            else:
+                self.logger.error(
+                    f"[RESULT]: {result} is invalid result format. Length is < 4."
+                )
 
 
 def main():
     ### Changes your DNS as needed
-    domain_server = ["1.1.1.1"]
+    domain_server = ["10.9.4.11"]
     print(
         "[Domain example]: google.com, yahoo.com, youtube.com, speedtest.net, twitch.tv"
     )
     scanned_domain = input("Please provide a Domain to scan: ")
     dns_query = Nslookup(dns_servers=domain_server, verbose=True, tcp=False)
 
-    ### IPv4 DNS Lookup Information
+    ### IPv4 and IPv6 DNS Lookup Information
     try:
-        dns_results_v4 = dns_query.dns_lookup(scanned_domain)
-        dns_v4_full = dns_results_v4.response_full
-        dns_v4_info = DNS(dns_v4_full)
+        dns_v4_results = dns_query.dns_lookup(scanned_domain)
+        dns_v4_info = DNS(dns_v4_results)
         cleaned_v4_results = dns_v4_info.clean_results()
-        for result in cleaned_v4_results:
-            dns_v4_info.enrich_v4_results(result)
+        dns_v4_info.print_dns_results(cleaned_v4_results)
     except IndexError:
         print(
-            f"[ERROR]: Unable to obtain IPv4 Lookup Information for provided domain: {scanned_domain}"
+            f"[INDEX ERROR]: Unable to obtain IPv4 Lookup Information for provided domain: {scanned_domain}"
         )
     except Exception as e:
-        print(f"[ERROR]: {e}")
-    ### IPv6 DNS Lookup Information
+        print(f"[GENERIC ERROR]: {e}")
+
     try:
-        dns_results_v6 = dns_query.dns_lookup6(scanned_domain)
-        dns_v6_full = dns_results_v6.response_full
-        dns_v6_info = DNS(dns_v6_full)
+        dns_v6_results = dns_query.dns_lookup6(scanned_domain)
+        dns_v6_info = DNS(dns_v6_results)
         cleaned_v6_results = dns_v6_info.clean_results()
-        for result in cleaned_v6_results:
-            dns_v6_info.enrich_v6_results(result)
+        dns_v6_info.print_dns_results(cleaned_v6_results)
     except IndexError:
         print(
-            f"[ERROR]: Unable to obtain IPv6 Lookup Information for provided domain: {scanned_domain}"
+            f"[INDEX ERROR]: Unable to obtain IPv6 Lookup Information for provided domain: {scanned_domain}"
         )
     except Exception as e:
-        print(f"[ERROR]: {e}")
+        print(f"[GENERIC ERROR]: {e}")
+
     ### SOA Lookup Information
     try:
         soa_results = dns_query.soa_lookup(scanned_domain)
-        soa_full = soa_results.response_full
-        soa_info = SOA(soa_full)
-        cleaned_soa_results = soa_info.clean_results()
-        soa_info.enrich_soa_results(cleaned_soa_results)
+        soa_info = SOA(soa_results)
+        cleaned_soa_results = soa_info.clean_soa_results()
+        soa_info.print_soa_results(cleaned_soa_results)
     except IndexError:
         print(
-            f"[ERROR]: Unable to obtain SOA Lookup Information for provided domain: {scanned_domain}"
+            f"[INDEX ERROR]: Unable to obtain SOA Lookup Information for provided domain: {scanned_domain}"
         )
     except Exception as e:
-        print(f"[ERROR]: {e}")
+        print(f"[GENERIC ERROR]: {e}")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()
 
     """
