@@ -35,6 +35,25 @@ class SOA:
         return cleaned_results
 
     def print_soa_results(self, cleaned_results: list[str]) -> None:
+        """Format and print cleaned SOA result data
+
+        Args:
+            cleaned_results (list[str]): Logged SOA result data from 'SOA.clean_results'
+
+        [EXAMPLE OUTPUT]:
+        INFO:SOA:{'Domain Name': 'yahoo.com.',
+                  'TTL': '1029',
+                  'Record Class': 'IN',
+                  'Record Type': 'SOA',
+                  'Primary Name Server': 'ns1.yahoo.com.',
+                  'Responsible Email': 'hostmaster.yahoo-inc.com.',
+                  'Serial Number': '2023090705',
+                  'Refresh Interval': '3600',
+                  'Retry Interval': '300',
+                  'Expire Limit': '1814400',
+                  'Minimum TTL': '600'
+                  }
+        """
         # Check if the result list contains at least 11 elements
         if len(cleaned_results) >= 11:
             enriched_results = {
@@ -89,6 +108,23 @@ class DNS:
 
         Args:
             cleaned_results (list[str]): Cleaned DNS result data from 'DNS.clean_results'
+
+        [EXAMPLE OUTPUT]:
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '74.6.231.20'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '74.6.143.25'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '98.137.11.163'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '74.6.143.26'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '34.225.127.72'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '74.6.231.21'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '54.161.105.65'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '20', 'Type': 'A', 'IP': '98.137.11.164'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '312', 'Type': 'AAAA', 'IP': '2001:4998:24:120d::1:0'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '312', 'Type': 'AAAA', 'IP': '2001:4998:124:1507::f001'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '312', 'Type': 'AAAA', 'IP': '2001:4998:44:3507::8000'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '312', 'Type': 'AAAA', 'IP': '2001:4998:124:1507::f000'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '312', 'Type': 'AAAA', 'IP': '2001:4998:44:3507::8001'}
+            INFO:DNS:{'Domain': 'yahoo.com.', 'TTL': '312', 'Type': 'AAAA', 'IP': '2001:4998:24:120d::1:1'}
+
         """
         for result in cleaned_results:
             part = result.split()
@@ -157,39 +193,3 @@ def main():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     main()
-
-    """
-    ### [EXAMPLE OUTPUT] ###
-    ### DNS
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.231.20'}
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.231.21'}
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '54.161.105.65'}
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '98.137.11.164'}
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '34.225.127.72'}
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.143.26'}
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.143.25'}
-    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '98.137.11.163'}
-    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:124:1507::f000'}
-    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:44:3507::8001'}
-    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:44:3507::8000'}
-    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:124:1507::f001'}
-    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:24:120d::1:0'}
-    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:24:120d::1:1'}
-    
-    ### SOA
-    {
-        'Domain Name': 'yahoo.com', 
-        'TTL': '1800', 
-        'Record Class': 'IN', 
-        'Record Type': 'SOA', 
-        'Primary Name Server': 'ns1.yahoo.com', 
-        'Responsible Email': 'hostmaster.yahoo-inc.com', 
-        'Serial Number': '2023090610', 
-        'Refresh Interval': '3600', 
-        'Retry Interval': '300', 
-        'Expire Limit': '1814400', 
-        'Minimum TTL': '600',
-    }
-    
-
-    """
