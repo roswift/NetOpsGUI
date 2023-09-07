@@ -8,43 +8,53 @@ import ipinfo
 
 handler = ipinfo.getHandler()
 ip_address = input("Please provide a valid IPv4 or IPv6 address to check: ")
+
+
+def print_nested_dict(d, prefix=""):
+    for key, value in d.items():
+        if isinstance(value, dict):
+            print_nested_dict(value, prefix + key + "_")
+        else:
+            print(prefix + key + ": ", value)
+
+
 try:
     details = handler.getDetails(ip_address)
     results = details.all
-    ### Filter out 'readme' from results. The 'readme' key includes data about using an auth-token provided by signing up at ipinfo.io
     final_results = {key: value for key, value in results.items() if key != "readme"}
-    print(final_results)
+    for key, value in final_results.items():
+        if isinstance(value, dict):
+            print_nested_dict(value, key + " ")
+        else:
+            print(key + ": ", value)
+
 except Exception as e:
     print(f"[ERROR]: {e}")
+
 
 ### If you wanted to print out specific items from the dictionary you can do things like: results.ip, results.loc, results.postal etc.
 
 """
 ###[EXAMPLE OUTPUT]###
 
-{
-    'ip': '8.8.8.8', 
-    'hostname': 'dns.google', 
-    'anycast': True, 
-    'city': 'Mountain View', 
-    'region': 'California', 
-    'country': 'US', 
-    'loc': '37.4056,-122.0775', 
-    'org': 'AS15169 Google LLC', 
-    'postal': '94043', 
-    'timezone': 
-    'America/Los_Angeles', 
-    'readme': 'https://ipinfo.io/missingauth', 
-    'country_name': 'United States', 
-    'isEU': False, 
-    'country_flag': {'emoji': '🇺🇸', 
-    'unicode': 'U+1F1FA U+1F1F8'}, 
-    'country_currency': {'code': 'USD', 
-                        'symbol': '$'}, 
-    'continent': {'code': 'NA', 
-                'name': 'North America'}, 
-    'latitude': '37.4056', 
-    'longitude': '-122.0775'},
-}
+ip:  151.101.2.167
+anycast:  True
+city:  San Francisco
+region:  California
+country:  US
+loc:  37.7621,-122.3971
+org:  AS54113 Fastly, Inc.
+postal:  94107
+timezone:  America/Los_Angeles
+country_name:  United States
+isEU:  False
+country_flag emoji:  🇺🇸
+country_flag unicode:  U+1F1FA U+1F1F8
+country_currency code:  USD
+country_currency symbol:  $
+continent code:  NA
+continent name:  North America
+latitude:  37.7621
+longitude:  -122.3971
 
 """
