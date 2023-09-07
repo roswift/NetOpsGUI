@@ -11,7 +11,7 @@ ip_address = input("Please provide a valid IPv4 or IPv6 address to check: ")
 try:
     details = handler.getDetails(ip_address)
     results = details.all
-    ### Filter out 'readme' from results. The 'readme' key includes meaningless data about using an auth-token provided by signing up at ipinfo.io
+    ### Filter out 'readme' from results. The 'readme' key includes data about using an auth-token provided by signing up at ipinfo.io
     final_results = {key: value for key, value in results.items() if key != "readme"}
     print(final_results)
 except Exception as e:
