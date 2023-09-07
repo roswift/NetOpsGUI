@@ -1,6 +1,10 @@
 from nslookup import Nslookup
 import re
 
+### https://github.com/wesinator/pynslookup
+### Be sure to change you DNS in the main() function to fit your needs
+
+
 class SOA:
     def __init__(self, args):
         self.args = args
@@ -10,7 +14,6 @@ class SOA:
         entry = self.args[0]
         split_strings = re.split(r" ", entry)
         for result in split_strings:
-            result = result.replace(".com.", ".com")
             cleaned_results.append(result)
         return cleaned_results
 
@@ -45,7 +48,6 @@ class DNS:
         entry = self.args[0]
         split_strings = re.split(r"\n", entry)
         for result in split_strings:
-            result = result.replace(".com.", ".com")
             cleaned_results.append(result)
         return cleaned_results
 
@@ -77,7 +79,11 @@ class DNS:
 
 
 def main():
+    ### Changes your DNS as needed
     domain_server = ["1.1.1.1"]
+    print(
+        "[Domain example]: google.com, yahoo.com, youtube.com, speedtest.net, twitch.tv"
+    )
     scanned_domain = input("Please provide a Domain to scan: ")
     dns_query = Nslookup(dns_servers=domain_server, verbose=True, tcp=False)
 
@@ -126,3 +132,39 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    """
+    ### [EXAMPLE OUTPUT] ###
+    ### DNS
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.231.20'}
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.231.21'}
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '54.161.105.65'}
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '98.137.11.164'}
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '34.225.127.72'}
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.143.26'}
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '74.6.143.25'}
+    {'Domain': 'yahoo.com', 'TTL': '1241', 'Type': 'A', 'IP': '98.137.11.163'}
+    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:124:1507::f000'}
+    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:44:3507::8001'}
+    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:44:3507::8000'}
+    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:124:1507::f001'}
+    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:24:120d::1:0'}
+    {'Domain': 'yahoo.com', 'TTL': '1289', 'Type': 'AAAA', 'IP': '2001:4998:24:120d::1:1'}
+    
+    ### SOA
+    {
+        'Domain Name': 'yahoo.com', 
+        'TTL': '1800', 
+        'Record Class': 'IN', 
+        'Record Type': 'SOA', 
+        'Primary Name Server': 'ns1.yahoo.com', 
+        'Responsible Email': 'hostmaster.yahoo-inc.com', 
+        'Serial Number': '2023090610', 
+        'Refresh Interval': '3600', 
+        'Retry Interval': '300', 
+        'Expire Limit': '1814400', 
+        'Minimum TTL': '600',
+    }
+    
+
+    """
