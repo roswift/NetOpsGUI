@@ -1,4 +1,5 @@
 from nslookup import Nslookup, DNSresponse
+from noc_get_local_dns import get_dns_config
 import logging
 import re
 
@@ -143,8 +144,7 @@ class DNS:
 
 
 def main():
-    ### Changes your DNS as needed
-    domain_server = ["1.1.1.1"]
+    domain_server = get_dns_config()
     print(
         "[Domain example]: google.com, yahoo.com, youtube.com, speedtest.net, twitch.tv"
     )
