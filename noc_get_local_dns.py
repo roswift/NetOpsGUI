@@ -1,41 +1,46 @@
 import platform
+import subprocess
 import re
 
 
 def get_dns_config() -> list:
-    """Run Subprocess: ipconfig /all or read the /etc/resolv.conf file to obtain the current DNS server on the computer.
+    """Retrieve DNS server information based on the operating system.
 
     Returns:
-        list: returns a list to use in the noc_nslookup.py file.
+        list: List of DNS server IPs.
     """
     system = platform.system()
     if system == "Windows":
-        import subprocess
-
         try:
-            output = subprocess.check_output(["ipconfig", "/all"]).decode("utf-8")
-            dns_servers = re.findall(r"DNS Server(.*?)\n", output, re.DOTALL)[0].strip()
-            return [dns_servers.split()[-1]]
+            command = 'ipconfig | findstr "Default Gateway"'
+            output = subprocess.check_output(
+                command, shell=True, stderr=subprocess.STDOUT
+            ).decode("utf-8")
+            dns_configs = re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", output)
+            return dns_configs
         except subprocess.CalledProcessError:
             return []
-
     elif system == "Linux" or system == "Darwin":
-        with open("/etc/resolv.conf") as resolv_confg:
-            lines = resolv_confg.readlines()
-            dns_servers = [
-                line.strip().split()[1]
-                for line in lines
-                if line.startswith("nameserver")
-            ]
-            return dns_servers
+        try:
+            with open("/etc/resolv.conf") as resolv_conf:
+                dns_configs = [
+                    line.split()[1]
+                    for line in resolv_conf
+                    if line.strip().startswith("nameserver")
+                ]
+                return dns_configs
+        except FileNotFoundError:
+            return []
     else:
         return []
 
 
 def main():
-    dns_servers = get_dns_config()
-    if dns_servers:
-        print(dns_servers)
+    dns_configs = get_dns_config()
+    if dns_configs:
+        print("DNS Settings:")
+        for server in dns_configs:
+            print(server)
     else:
         print("DNS server information not found.")
 
